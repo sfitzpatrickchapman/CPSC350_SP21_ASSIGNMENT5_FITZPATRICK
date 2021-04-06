@@ -12,8 +12,11 @@ public:
 	~Queue();
 
 	/* Core functions */
-	void queue(int nTime);
+	void enqueue(int nTime);
 	int dequeue();
+
+	/* Aux functions */
+	void printQueue();
 
 	/* Variables and pointers */
 	Node* front;

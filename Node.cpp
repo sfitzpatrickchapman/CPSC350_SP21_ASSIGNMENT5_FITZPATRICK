@@ -8,4 +8,8 @@ Node::Node(int nTime) {
 	prev = 0;
 }
 
-Node::~Node() {} //TODO: what goes in here?
+Node::~Node() {
+	timeNeeded = 0;
+	next = 0;
+	prev = 0;
+} //TODO: what goes in here?
