@@ -18,10 +18,37 @@ Queue::~Queue() {
     //}
 }
 
-void Queue::queue(int nTime) {
+void Queue::enqueue(int nTime) {
+	Node* newNode = new Node(nTime);
 
+	newNode->next = back;
+
+	if (queueSize == 0) {
+		front = newNode;
+		back = newNode;
+	}
+	else {
+		back->prev = newNode;
+		back = newNode;
+	}
+	queueSize++;
 }
 
 int Queue::dequeue() {
-    return 0;
+	try {
+		if (queueSize == 0)
+			throw 1;
+
+		int temp = front->timeNeeded;
+		front = front->prev;
+
+	  return temp;
+	}
+	catch (int x) {
+		cout << "ERROR #" << x << ": Cannot dequeue from empty queue." << endl << endl;
+	}
+}
+
+void Queue::printQueue() {
+	cout << "umm maybe finish this" << endl;
 }
