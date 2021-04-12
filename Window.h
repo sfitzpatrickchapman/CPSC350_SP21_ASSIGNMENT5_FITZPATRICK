@@ -8,6 +8,9 @@ class Window {
 public:
 	Window();
 	~Window();
+
+	int timeLeft;
+	int idleTime;
 };
 
 #endif
