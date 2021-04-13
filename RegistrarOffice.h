@@ -4,7 +4,6 @@
 #include "Window.h"
 #include "Node.h"
 #include "Queue.h"
-#include <vector>
 #include <list>
 #include <iostream>
 using namespace std;

@@ -45,29 +45,49 @@ void RegistrarOffice::iterate(list<int> input) {
 		}
 	}
 
-	while (studentLine != 0) {
-		if (timeIncrements.front() == timeMinutes) {
+	while (studentLine != 0) { //should loop until queue empty
+		if (timeIncrements.front() == timeMinutes) { //if came during at the time
 			//stat variable adjustments
 			totalStudents += studentAmounts.front(); //add to total students
 			if (studentAmounts.front() > longestWaitTime)
-				longestWaitTime = studentAmounts.front();
+				longestWaitTime = studentAmounts.front(); //update longestWaitTime
 			if (studentAmounts.front() > 10)
-				numStudentsOverTen++;
+				numStudentsOverTen++; //update/increment numStudentsOverTen
 
+			/* For each student (i loop), iterate through all of the windows to see
+			if they are vacant (j loop). If so, dequeue the value into that window */
 			for (int i = 0; i < studentAmounts.front(); i++) {
 				for (int j = 0; j < windowsAmt; j++) {
-					if (windows[j].timeLeft == 0) { //empty window
-						windows[j].timeLeft = studentLine->dequeue();
+					if (windows[j].timeLeft == 0) { //if there is an empty window
+						if (studentLine->queueSize != 0) { //and if queue isn't empty
+							windows[j].timeLeft = studentLine->dequeue(); //TODO: sus
+							windows[j].atIdle = false;
 
-						//stats
-						totalWaitTime += windows[j].timeLeft; //add to all waiting time
-						if (windows[j].timeLeft > longestWindowIdleTime)
-							longestWindowIdleTime = windows[j].timeLeft;
+							//stat updates
+							totalWaitTime += windows[j].timeLeft; //add to all waiting time
+							if (windows[j].timeLeft > longestWindowIdleTime)
+								longestWindowIdleTime = windows[j].timeLeft;
+						}
+						else { //queue empty
+							windows[j].atIdle = true;
+						}
+
+
+
+						//stat udates
 						if (windows[j].idleTime > 5)
 							numWindowsIdleOverFive++;
-
-						break; //from just the j loop
 					}
+
+					//if window j at idle, increment idle time
+					if (windows[j].atIdle)
+						windows[j].idleTime++;
+
+					//update longest idle time stat if needed
+					if (windows[j].idleTime > longestWindowIdleTime)
+						longestWindowIdleTime = windows[j].idleTime;
+
+					break; //from just j loop; prevent multiple students to one window
 				}
 			}
 
@@ -75,9 +95,10 @@ void RegistrarOffice::iterate(list<int> input) {
 			studentAmounts.pop_front();
 		}
 
-		//decrement windows' time left
-		for (int i = 0; i < windowsAmt; i++)
-			windows[i].timeLeft--;
+		//update all windows
+		for (int i = 0; i < windowsAmt; i++) {
+			windows[i].timeLeft--; //decrement windows' time left
+		}
 
 		timeMinutes++;
 	}
@@ -87,5 +108,9 @@ void RegistrarOffice::calcStats() {
 	//other counter stats already calculated in iterate func
 	meanWaitTime = totalWaitTime / totalStudents;
 	//medianWaitTime = ?
-	meanWindowIdleTime = totalWindowIdleTime / timeMinutes; //TODO: find where to increment idle time
+
+	//calculate meanWindowIdleTime
+	for (int i = 0; i < windowsAmt; i++) //calculate totalWindowIdleTime first
+		totalWindowIdleTime += windows[i].idleTime;
+	meanWindowIdleTime = totalWindowIdleTime / timeMinutes;
 }

@@ -10,6 +10,7 @@ public:
 	~Window();
 
 	int timeLeft;
+	bool atIdle;
 	int idleTime;
 };
 

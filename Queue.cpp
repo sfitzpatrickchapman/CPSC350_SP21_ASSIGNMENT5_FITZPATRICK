@@ -41,6 +41,7 @@ int Queue::dequeue() {
 
 		int temp = front->timeNeeded;
 		front = front->prev;
+		queueSize--;
 
 	  return temp;
 	}
