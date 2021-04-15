@@ -12,14 +12,14 @@ class RegistrarOffice {
 public:
     RegistrarOffice(list<int> input);
     ~RegistrarOffice();
-    void iterate();
-    void calcStats();
+    void iterate(); //run simulation
+    void calcStats(); //calculate complex stats
     void printAuxStats();
     void printStats();
 
 private:
-    list<int> preppedInput;
-    list<int> studentNTimes;
+    list<int> preppedInput; //input - window amt
+    list<int> studentNTimes; //for finding median
     Queue* studentLine;
     Window* windows;
     int windowsAmt;

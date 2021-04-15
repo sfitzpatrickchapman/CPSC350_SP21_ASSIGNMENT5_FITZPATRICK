@@ -1,10 +1,10 @@
 #include "RegistrarOffice.h"
 
 RegistrarOffice::RegistrarOffice(list<int> input) {
-    studentLine = new Queue();
+    studentLine = new Queue(); //where they wait
     windowsAmt = input.front(); input.pop_front();
-    preppedInput = input;
-    windows = new Window[windowsAmt];
+    preppedInput = input; //input file without windowsAmt
+    windows = new Window[windowsAmt]; //students will input here
 
     //stat vars
     timeMinutes = 0;
@@ -25,9 +25,9 @@ RegistrarOffice::~RegistrarOffice() {
 
 void RegistrarOffice::iterate() {
     bool allWindowsVacant = true;
-    int studentsForCurrTime = 99999999;
+    int studentsForCurrTime = 99999999; //999 prevents inital skipping
 
-    /* Run the simulation */
+    /*============================= SIMULATION LOOP =============================*/
     while (true) {
         // ADD TO THE STUDENT LINE (QUEUE)
         if (timeMinutes == preppedInput.front()) { //if time has new students
@@ -46,9 +46,11 @@ void RegistrarOffice::iterate() {
         }
 
         // PUT STUDENTS FROM LINE INTO VACANT WINDOWS
-        if (studentLine->queueSize > 0) {
-            for (int i = 0; i < windowsAmt; i++) {
+        if (studentLine->queueSize > 0) { //if stdts in line
+            for (int i = 0; i < windowsAmt; i++) { //for all windows
+								//if windows are vacant and stdts still in line
                 if (windows[i].timeLeft <= 0 && studentLine->queueSize > 0) {
+										//calc the student's wait time
                     int stdtWaitTime = timeMinutes - studentLine->front->timeAdded;
 
                     //STATS: median swt, longest swt, and swt over 10
@@ -67,30 +69,26 @@ void RegistrarOffice::iterate() {
             }
         }
 
-
         //decrement windows time left
         for (int i = 0; i < windowsAmt; i++) {
             windows[i].timeLeft--; //decrement windows' time left
         }
 
-        //increment time
-        timeMinutes++;
-
-        //STAT updates
-        totalWaitTime += studentLine->queueSize;
+        timeMinutes++; //increment time
+        totalWaitTime += studentLine->queueSize; //STAT: total stdt wait time
 
         //check if all windows are vacant and update stats
-        allWindowsVacant = true;
+        allWindowsVacant = true; //will most likely change below
         for (int i = 0; i < windowsAmt; i++) {
             if (windows[i].timeLeft > 0) { //if a window isn't vacant
-                allWindowsVacant = false;
-                windows[i].atIdle = false;
+                allWindowsVacant = false; //reset to false
+                windows[i].atIdle = false; //reset to false
             }
             else { //window vacant
                 totalWindowIdleTime++; //STAT
 
                 windows[i].atIdle = true; //set atIdle status to true
-                windows[i].idleTime++;
+                windows[i].idleTime++; //increment that window idle time
 
                 //STAT: longest window idle time
                 if (windows[i].idleTime > longestWindowIdleTime)
@@ -101,7 +99,6 @@ void RegistrarOffice::iterate() {
                     windows[i].idledOverFive = true;
             }
         }
-
 
         //BREAK IF ALL WINDOWS VACANT, NO MORE STUDENTS IN LINE, & ENOUGH TIME HAS PASSED
         if (allWindowsVacant && studentLine->queueSize == 0 && timeMinutes > studentsForCurrTime)
@@ -118,13 +115,11 @@ void RegistrarOffice::calcStats() { //other counter stats already calculated in 
     if (studentNTimes.size() % 2 == 0) { //if even
         for (int i = 0; i < studentNTimes.size() / 2; i++)
             itr++;
-
         medianWaitTime = ((double) * itr + *--itr) / 2;
     }
     else { //if odd
         for (int i = 0; i < studentNTimes.size() / 2; i++)
             itr++;
-
         medianWaitTime = *itr;
     }
 
