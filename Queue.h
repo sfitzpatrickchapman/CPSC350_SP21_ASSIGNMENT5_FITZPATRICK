@@ -7,21 +7,21 @@ using namespace std;
 
 class Queue {
 public:
-	/* Constructor & destructor */
-	Queue();
-	~Queue();
+    /* Constructor & destructor */
+    Queue();
+    ~Queue();
 
-	/* Core functions */
-	void enqueue(int nTime);
-	int dequeue();
+    /* Core functions */
+    void enqueue(int nTime, int timeAdded);
+    int dequeue();
 
-	/* Aux functions */
-	void printQueue();
+    /* Aux functions */
+    int peek();
 
-	/* Variables and pointers */
-	Node* front;
-	Node* back;
-	size_t queueSize;
+    /* Variables and pointers */
+    Node* front;
+    Node* back;
+    size_t queueSize;
 };
 
 #endif

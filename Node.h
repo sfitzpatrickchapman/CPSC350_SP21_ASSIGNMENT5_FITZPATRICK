@@ -6,13 +6,14 @@ using namespace std;
 
 class Node {
 public:
-	Node();
-	Node(int nTime);
-	~Node();
+    Node();
+    Node(int nTime, int timeA);
+    ~Node();
 
-	int timeNeeded;
-	Node* next;
-	Node* prev;
+    int timeNeeded;
+    int timeAdded;
+    Node* next;
+    Node* prev;
 };
 
 #endif

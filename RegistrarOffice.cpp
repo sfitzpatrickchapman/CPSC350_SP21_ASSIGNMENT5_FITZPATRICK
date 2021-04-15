@@ -1,116 +1,163 @@
 #include "RegistrarOffice.h"
 
 RegistrarOffice::RegistrarOffice(list<int> input) {
-	//read and initialize first line (window amt)
-	studentLine = new Queue();
-	windowsAmt = input.front(); input.pop_front();
+    studentLine = new Queue();
+    windowsAmt = input.front(); input.pop_front();
+    preppedInput = input;
+    windows = new Window[windowsAmt];
 
-	//stat vars
-	timeMinutes = 0;
-	totalWaitTime = 0;
-	longestWaitTime = 0;
-	numStudentsOverTen = 0;
-	totalWindowIdleTime = 0;
-	longestWindowIdleTime = 0;
-	numWindowsIdleOverFive = 0;
-
-	//windows = malloc(sizeof(Window) * openWindows);
-	//windows = new int[windowsAmt];
-	windows = new Window[windowsAmt];
-
+    //stat vars
+    timeMinutes = 0;
+    timeElapsed = 0;
+    totalWaitTime = 0;
+    totalStudents = 0;
+    longestWaitTime = 0;
+    numStudentsOverTen = 0;
+    totalWindowIdleTime = 0;
+    longestWindowIdleTime = 0;
+    numWindowsIdleOverFive = 0;
 }
 
 RegistrarOffice::~RegistrarOffice() {
-	delete windows;
-} //delete queue?
-
-void RegistrarOffice::iterate(list<int> input) {
-	list<int> timeIncrements;
-	list<int> studentAmounts;
-
-
-	/* Get data from input list, put it where it belongs */
-	while (input.size() != 0) {
-		//read time and student amount from input
-		int currTime = input.front(); input.pop_front();
-		timeIncrements.push_back(currTime);
-
-		int studentAmt = input.front(); input.pop_front();
-		studentAmounts.push_back(studentAmt);
-
-		//add reqTimes for each of students at that time
-		for (int i = 0; i < studentAmt; i++) {
-			int neededTime = input.front(); input.pop_front();
-			studentLine->enqueue(neededTime);
-		}
-	}
-
-	while (studentLine != 0) { //should loop until queue empty
-		if (timeIncrements.front() == timeMinutes) { //if came during at the time
-			//stat variable adjustments
-			totalStudents += studentAmounts.front(); //add to total students
-			if (studentAmounts.front() > longestWaitTime)
-				longestWaitTime = studentAmounts.front(); //update longestWaitTime
-			if (studentAmounts.front() > 10)
-				numStudentsOverTen++; //update/increment numStudentsOverTen
-
-			/* For each student (i loop), iterate through all of the windows to see
-			if they are vacant (j loop). If so, dequeue the value into that window */
-			for (int i = 0; i < studentAmounts.front(); i++) {
-				for (int j = 0; j < windowsAmt; j++) {
-					if (windows[j].timeLeft == 0) { //if there is an empty window
-						if (studentLine->queueSize != 0) { //and if queue isn't empty
-							windows[j].timeLeft = studentLine->dequeue(); //TODO: sus
-							windows[j].atIdle = false;
-
-							//stat updates
-							totalWaitTime += windows[j].timeLeft; //add to all waiting time
-							if (windows[j].timeLeft > longestWindowIdleTime)
-								longestWindowIdleTime = windows[j].timeLeft;
-						}
-						else { //queue empty
-							windows[j].atIdle = true;
-						}
-
-
-
-						//stat udates
-						if (windows[j].idleTime > 5)
-							numWindowsIdleOverFive++;
-					}
-
-					//if window j at idle, increment idle time
-					if (windows[j].atIdle)
-						windows[j].idleTime++;
-
-					//update longest idle time stat if needed
-					if (windows[j].idleTime > longestWindowIdleTime)
-						longestWindowIdleTime = windows[j].idleTime;
-
-					break; //from just j loop; prevent multiple students to one window
-				}
-			}
-
-			timeIncrements.pop_front();
-			studentAmounts.pop_front();
-		}
-
-		//update all windows
-		for (int i = 0; i < windowsAmt; i++) {
-			windows[i].timeLeft--; //decrement windows' time left
-		}
-
-		timeMinutes++;
-	}
+    delete studentLine;
+    delete []windows;
 }
 
-void RegistrarOffice::calcStats() {
-	//other counter stats already calculated in iterate func
-	meanWaitTime = totalWaitTime / totalStudents;
-	//medianWaitTime = ?
+void RegistrarOffice::iterate() {
+    bool allWindowsVacant = true;
+    int studentsForCurrTime = 99999999;
 
-	//calculate meanWindowIdleTime
-	for (int i = 0; i < windowsAmt; i++) //calculate totalWindowIdleTime first
-		totalWindowIdleTime += windows[i].idleTime;
-	meanWindowIdleTime = totalWindowIdleTime / timeMinutes;
+    /* Run the simulation */
+    while (true) {
+        // ADD TO THE STUDENT LINE (QUEUE)
+        if (timeMinutes == preppedInput.front()) { //if time has new students
+            preppedInput.pop_front();
+
+            //make variable that defines the amount of new students for this time
+            studentsForCurrTime = preppedInput.front();
+            preppedInput.pop_front();
+
+            //add the new students from the list to the queue
+            for (int i = 0; i < studentsForCurrTime; i++) {
+                studentLine->enqueue(preppedInput.front(), timeMinutes);
+                preppedInput.pop_front();
+                totalStudents++; //STAT: total amount of students
+            }
+        }
+
+        // PUT STUDENTS FROM LINE INTO VACANT WINDOWS
+        if (studentLine->queueSize > 0) {
+            for (int i = 0; i < windowsAmt; i++) {
+                if (windows[i].timeLeft <= 0 && studentLine->queueSize > 0) {
+                    int stdtWaitTime = timeMinutes - studentLine->front->timeAdded;
+
+                    //STATS: median swt, longest swt, and swt over 10
+                    studentNTimes.push_front(stdtWaitTime); //find median latr
+
+                    if (stdtWaitTime > longestWaitTime)
+                        longestWaitTime = stdtWaitTime; //STAT
+                    if (stdtWaitTime > 10)
+                        numStudentsOverTen++; //STAT
+
+                    //occupy the window and update its vars
+                    windows[i].timeLeft = studentLine->dequeue();
+                    windows[i].atIdle = false;
+                    windows[i].idleTime = 0;
+                }
+            }
+        }
+
+
+        //decrement windows time left
+        for (int i = 0; i < windowsAmt; i++) {
+            windows[i].timeLeft--; //decrement windows' time left
+        }
+
+        //increment time
+        timeMinutes++;
+
+        //STAT updates
+        totalWaitTime += studentLine->queueSize;
+
+        //check if all windows are vacant and update stats
+        allWindowsVacant = true;
+        for (int i = 0; i < windowsAmt; i++) {
+            if (windows[i].timeLeft > 0) { //if a window isn't vacant
+                allWindowsVacant = false;
+                windows[i].atIdle = false;
+            }
+            else { //window vacant
+                totalWindowIdleTime++; //STAT
+
+                windows[i].atIdle = true; //set atIdle status to true
+                windows[i].idleTime++;
+
+                //STAT: longest window idle time
+                if (windows[i].idleTime > longestWindowIdleTime)
+                    longestWindowIdleTime = windows[i].idleTime;
+
+                //STAT: amount of windows that idled over 5
+                if (windows[i].idleTime > 5)
+                    windows[i].idledOverFive = true;
+            }
+        }
+
+
+        //BREAK IF ALL WINDOWS VACANT, NO MORE STUDENTS IN LINE, & ENOUGH TIME HAS PASSED
+        if (allWindowsVacant && studentLine->queueSize == 0 && timeMinutes > studentsForCurrTime)
+            break;
+    }
+}
+
+void RegistrarOffice::calcStats() { //other counter stats already calculated in iterate func
+    meanWaitTime = (float)totalWaitTime / (float)totalStudents;
+
+    //calculate median student wait time
+    auto itr = studentNTimes.begin();
+
+    if (studentNTimes.size() % 2 == 0) { //if even
+        for (int i = 0; i < studentNTimes.size() / 2; i++)
+            itr++;
+
+        medianWaitTime = ((double) * itr + *--itr) / 2;
+    }
+    else { //if odd
+        for (int i = 0; i < studentNTimes.size() / 2; i++)
+            itr++;
+
+        medianWaitTime = *itr;
+    }
+
+    //calculate amount of windows that idled over five
+    for (int i = 0; i < windowsAmt; i++) {
+        if (windows[i].idledOverFive)
+            numWindowsIdleOverFive++;
+    }
+
+    //calculate meanWindowIdleTime
+    meanWindowIdleTime = (float)totalWindowIdleTime / (float)windowsAmt;
+}
+
+void RegistrarOffice::printStats() {
+    cout << "\n<--------------------<STATS>-------------------->" << endl;
+    cout << "  Mean Student Wait Time             "; printf("%.2f", meanWaitTime); cout << " mins" << endl;
+    cout << "  Median Student Wait Time           "; printf("%.2f", medianWaitTime); cout << " mins" << endl;
+    cout << "  Longest Student Wait Time          " << longestWaitTime << " mins" << endl;
+    cout << "  Student Wait Times Over Ten        " << numStudentsOverTen << " stdts" << endl;
+    cout << endl;
+    cout << "  Mean Window Idle Time              "; printf("%.2f", meanWindowIdleTime); cout << " mins" << endl;
+    cout << "  Longest Window Idle Time           " << longestWindowIdleTime << " mins" << endl;
+    cout << "  Windows That Idled Over Five       " << numWindowsIdleOverFive << " windows" << endl;
+    cout << "<----------------------------------------------->" <<  endl;
+    cout << endl;
+}
+
+void RegistrarOffice::printAuxStats() {
+    cout << "\n<--------------<AUX STATS>-------------->" << endl;
+    cout << "  Time Elapsed                  " << timeMinutes << " mins" << endl;
+    cout << "  Total Student Wait Time       " << totalWaitTime << " mins" << endl;
+    cout << "  Total Amount of Students      " << totalStudents << " stdts" << endl;
+    cout << "  Total Window Idle Time        " << totalWindowIdleTime << " mins" << endl;
+    cout << "<--------------------------------------->" <<  endl;
+    cout << endl;
 }

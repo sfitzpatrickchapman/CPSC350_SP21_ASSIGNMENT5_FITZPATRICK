@@ -10,30 +10,35 @@ using namespace std;
 
 class RegistrarOffice {
 public:
-	RegistrarOffice(list<int> input);
-	~RegistrarOffice();
-	void iterate(list<int> input);
-	void calcStats();
+    RegistrarOffice(list<int> input);
+    ~RegistrarOffice();
+    void iterate();
+    void calcStats();
+    void printAuxStats();
+    void printStats();
 
 private:
-	Queue* studentLine;
-	Window* windows;
-	int windowsAmt;
+    list<int> preppedInput;
+    list<int> studentNTimes;
+    Queue* studentLine;
+    Window* windows;
+    int windowsAmt;
+    int timeMinutes;
 
-	//nums for stat calcs
-	int timeMinutes;
-	int totalWaitTime;
-	int totalStudents;
-	int totalWindowIdleTime;
+    //nums for stat calcs
+    int timeElapsed;
+    int totalWaitTime;
+    int totalStudents;
+    int totalWindowIdleTime;
 
-	//stat answers
-	float meanWaitTime;
-	float medianWaitTime;
-	int longestWaitTime;
-	int numStudentsOverTen;
-	float meanWindowIdleTime;
-	int longestWindowIdleTime;
-	int numWindowsIdleOverFive;
+    //stat answers
+    float meanWaitTime;
+    float medianWaitTime;
+    int longestWaitTime;
+    int numStudentsOverTen;
+    float meanWindowIdleTime;
+    int longestWindowIdleTime;
+    int numWindowsIdleOverFive;
 };
 
 #endif

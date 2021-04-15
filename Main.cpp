@@ -7,25 +7,14 @@
 using namespace std;
 
 int main(int argc, char** argv) {
-	cout << "Running..." << endl;
+    FileProcessor fproc;
+    list<int> input = fproc.processFile("test.in.txt");
 
-	FileProcessor fproc;
-	list<int> input = fproc.processFile("test.in.txt");
+    RegistrarOffice* chapman = new RegistrarOffice(input);
+    chapman->iterate();
+    chapman->calcStats();
+    chapman->printAuxStats();
+    chapman->printStats();
 
-	RegistrarOffice* chapman = new RegistrarOffice(input);
-
-	// Queue* testQueue = new Queue();
-	// testQueue->enqueue(5);
-	// testQueue->enqueue(4);
-	// testQueue->enqueue(3);
-	//
-	// cout <<  testQueue->dequeue() << endl;
-	// cout <<  testQueue->dequeue() << endl;
-	// cout <<  testQueue->dequeue() << endl;
-	//
-	// testQueue->printQueue();
-
-
-	delete chapman; // D:
-	cout << "Done." << endl;
+    delete chapman; // D:
 }

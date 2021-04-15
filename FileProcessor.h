@@ -9,9 +9,9 @@ using namespace std;
 
 class FileProcessor {
 public:
-	FileProcessor();
-	~FileProcessor();
-	list<int> processFile(string inputFile);
+    FileProcessor();
+    ~FileProcessor();
+    list<int> processFile(string inputFile);
 };
 
 #endif

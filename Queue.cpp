@@ -1,55 +1,57 @@
 #include "Queue.h"
 
 Queue::Queue() {
-	queueSize = 0;
-	front = 0;
-	back = 0;
+    queueSize = 0;
+    front = 0;
+    back = 0;
 }
 
 Queue::~Queue() {
-    //TODO: adapt for int queue
-    //StackNode<T>* curr = top;
+    Node* curr = front;
 
-    ///* Loop through stack and delete each node */
-    //while (curr != 0) {
-    //    StackNode<T>* temp = curr->next; //remember next top
-    //    delete curr; //delete current top
-    //    curr = temp; //recall top's next to set as new top
-    //}
+    //Loop through queue and delete each node
+    while (curr != 0) {
+        Node* frontPrev = curr->prev;
+        delete curr;
+        curr = frontPrev;
+    }
 }
 
-void Queue::enqueue(int nTime) {
-	Node* newNode = new Node(nTime);
+void Queue::enqueue(int nTime, int timeAdded) {
+    Node* newNode = new Node(nTime, timeAdded);
 
-	newNode->next = back;
+    newNode->next = back;
 
-	if (queueSize == 0) {
-		front = newNode;
-		back = newNode;
-	}
-	else {
-		back->prev = newNode;
-		back = newNode;
-	}
-	queueSize++;
+    if (queueSize == 0) {
+        front = newNode;
+        back = newNode;
+    }
+    else {
+        back->prev = newNode;
+        back = newNode;
+    }
+    queueSize++;
 }
 
 int Queue::dequeue() {
-	try {
-		if (queueSize == 0)
-			throw 1;
+    try {
+        if (queueSize == 0)
+            throw 1;
 
-		int temp = front->timeNeeded;
-		front = front->prev;
-		queueSize--;
+        int frontData = front->timeNeeded; //save fdata to return
+        Node* frontPrev = front->prev; //save fprev to set as new f
+        delete front; //fully delete front node
+        front = frontPrev; //set new front to saved fprev value
+        queueSize--; //decrement queue size
 
-	  return temp;
-	}
-	catch (int x) {
-		cout << "ERROR #" << x << ": Cannot dequeue from empty queue." << endl << endl;
-	}
+      return frontData;
+    }
+    catch (int x) {
+        cout << "ERROR #" << x << ": Cannot dequeue from empty queue." << endl << endl;
+        exit(x);
+    }
 }
 
-void Queue::printQueue() {
-	cout << "umm maybe finish this" << endl;
+int Queue::peek() {
+    return front->timeNeeded;
 }
